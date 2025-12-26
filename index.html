@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYNTRAX | Infrastructure Service</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- CSS БАЗА --- */
+        :root {
+            --bg-main: #050507;
+            --bg-card: #0f0f16;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+
+            /* Цвета Proton-style но в темной теме */
+            --accent-primary: #6d4aff; /* Фиолетовый как у Proton */
+            --accent-glow: rgba(109, 74, 255, 0.4);
+            --success: #10b981; /* Зеленый для галочек */
+            --danger: #ef4444; /* Красный для зачеркнутого */
+
+            --border-glass: rgba(255, 255, 255, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.5;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 50% 0%, rgba(109, 74, 255, 0.15) 0%, transparent 40%);
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #fff 30%, var(--accent-primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* --- HEADER --- */
+        header {
+            padding: 25px 0;
+            border-bottom: 1px solid var(--border-glass);
+            backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(5, 5, 7, 0.9);
+        }
+        .nav-container { display: flex; justify-content: space-between; align-items: center; }
+
+        .logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800; font-size: 1.5rem; letter-spacing: -1px;
+            display: flex; align-items: center; gap: 12px;
+        }
+
+        /* --- HERO --- */
+        .hero { padding: 100px 0 80px; text-align: center; max-width: 900px; margin: 0 auto; }
+        .hero-tagline { color: var(--accent-primary); font-weight: 700; letter-spacing: 2px; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 20px; display: block; }
+        h1 { font-size: 3.8rem; line-height: 1.1; font-weight: 800; margin-bottom: 30px; }
+        .hero p { font-size: 1.2rem; color: var(--text-muted); margin-bottom: 40px; max-width: 700px; margin-left: auto; margin-right: auto; }
+
+        /* Trust Badges */
+        .stats-row {
+            display: flex; justify-content: center; gap: 30px; margin-bottom: 60px; flex-wrap: wrap;
+        }
+        .stat-badge {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass);
+            padding: 10px 20px; border-radius: 50px; font-size: 0.9rem; color: var(--text-main); display: flex; align-items: center; gap: 10px;
+        }
+        .stat-badge i { color: var(--accent-primary); }
+
+        /* --- FEATURES GRID --- */
+        .features-section { padding: 60px 0 80px; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
+
+        .feature-card {
+            background: var(--bg-card); border: 1px solid var(--border-glass);
+            padding: 35px; border-radius: 12px; transition: 0.3s;
+        }
+        .feature-card:hover { border-color: var(--accent-primary); transform: translateY(-5px); }
+
+        .card-icon {
+            width: 50px; height: 50px; background: rgba(109, 74, 255, 0.1); border-radius: 8px;display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: var(--accent-primary);
+            margin-bottom: 20px;
+        }
+        .feature-card h3 { font-size: 1.2rem; margin-bottom: 10px; }
+        .feature-card p { color: var(--text-muted); font-size: 0.9rem; }
+
+        /* --- NEW: HOW IT WORKS (WORKFLOW) --- */
+        .workflow-section { padding: 80px 0; border-top: 1px solid var(--border-glass); }
+        .workflow-header { text-align: center; margin-bottom: 60px; }
+        .workflow-header h2 { font-size: 2.5rem; margin-bottom: 10px; }
+
+        .steps-wrapper {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px;
+            position: relative;
+        }
+        /* Линия соединения (только для ПК) */
+        .steps-wrapper::before {
+            content: ''; position: absolute; top: 40px; left: 10%; right: 10%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--border-glass) 20%, var(--border-glass) 80%, transparent);
+            z-index: 0;
+        }
+
+        .step-item {
+            background: var(--bg-main); /* Чтобы перекрыть линию */
+            position: relative; z-index: 1;
+            text-align: center; padding: 0 10px;
+        }
+
+        .step-num {
+            width: 80px; height: 80px; margin: 0 auto 25px;
+            background: var(--bg-card); border: 1px solid var(--border-glass);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-family: 'JetBrains Mono'; font-size: 1.5rem; font-weight: 800;
+            color: var(--text-muted); box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            transition: 0.3s;
+        }
+        .step-item:hover .step-num { color: var(--accent-primary); border-color: var(--accent-primary); }
+
+        .step-item h4 { font-size: 1.2rem; margin-bottom: 15px; }
+        .step-item p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; }
+
+        .workflow-footer {
+            text-align: center; margin-top: 60px;
+            padding: 20px; background: rgba(109, 74, 255, 0.05);
+            border-radius: 12px; border: 1px solid rgba(109, 74, 255, 0.2);
+            font-weight: 600; color: white;
+        }
+
+        /* --- PRICING (PROTON STYLE) --- */
+        .pricing-section { padding: 80px 0; border-top: 1px solid var(--border-glass); background: rgba(255,255,255,0.01); }
+
+        .payment-header { text-align: center; margin-bottom: 50px; }
+        .payment-methods {
+            display: inline-flex; align-items: center; gap: 20px;
+            background: #111; padding: 10px 25px; border-radius: 50px; border: 1px solid var(--border-glass);
+        }
+        .method { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600; }
+        .method.active { color: #fff; }
+        .method.active i { color: #FFD700; }
+        .method.banned { color: #555; text-decoration: line-through; opacity: 0.6; }
+
+        .pricing-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px; align-items: start;
+        }
+
+        .plan-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px; padding: 30px;
+            display: flex; flex-direction: column; height: 100%;
+            position: relative; transition: 0.3s;
+        }
+        .plan-card:hover { border-color: #444; }
+
+        .plan-card.ultimate {
+            background: linear-gradient(180deg, rgba(109, 74, 255, 0.08) 0%, var(--bg-card) 100%);
+            border: 1px solid var(--accent-primary);
+            box-shadow: 0 0 40px rgba(109, 74, 255, 0.15);
+            transform: scale(1.02); z-index: 10;
+        }
+        .rec-tag {
+            position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            background: var(--accent-primary); color: white;
+            padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .plan-name { font-size: 1.1rem; color: var(--text-muted); font-weight: 600; margin-bottom: 10px; }
+        .plan-price { font-size: 2.2rem; font-weight: 800; color: white; margin-bottom: 5px; }
+        .plan-sub { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 25px; }
+
+        .plan-btn {
+            width: 100%; padding: 14px; border-radius: 8px; font-weight: 600; text-align: center;
+            text-decoration: none; margin-bottom: 30px; transition: 0.2s;
+        }
+        .btn-outline { border: 1px solid var(--border-glass); color: white; }
+        .btn-outline:hover { background: rgba(255,255,255,0.05); border-color: white; }
+        .btn-fill { background: var(--accent-primary); color: white; border: none; }
+        .btn-fill:hover { background: #5a3de0; }
+
+        .features-list { list-style: none; }
+        .features-list li {
+            margin-bottom: 12px; font-size: 0.9rem; color: #cbd5e1;
+            display: flex; align-items: flex-start; gap: 10px; line-height: 1.4;
+        }
+        .check { color: var(--success); min-width: 16px; margin-top: 3px; }
+
+        /* --- FOOTER & CUBE --- */
+        footer {
+            padding: 80px 0 40px; text-align: center; border-top: 1px solid var(--border-glass);
+            background: #020203;
+        }
+        .cube-container { width: 40px; height: 40px; margin: 0 auto 20px; perspective: 1000px; }
+        .cube {
+            width: 100%; height: 100%; position: relative; transform-style: preserve-3d;
+            transform: rotateX(-20deg) rotateY(35deg);
+        }
+        .face {
+            position: absolute; width: 40px; height: 40px;
+            background: rgba(109, 74, 255, 0.2); border: 1px solid var(--accent-primary);
+            box-shadow: 0 0 15px rgba(109, 74, 255, 0.3);
+        }
+        .front { transform: translateZ(20px); }
+        .back { transform: rotateY(180deg) translateZ(20px); }
+        .right { transform: rotateY(90deg) translateZ(20px); }
+        .left { transform: rotateY(-90deg) translateZ(20px); }
+        .top { transform: rotateX(90deg) translateZ(20px); }
+        .bottom { transform: rotateX(-90deg) translateZ(20px); }
+
+        .footer-slogan { font-size: 1.1rem; font-weight: 600; margin-bottom: 5px; color: white; }
+        .footer-brand { font-family: 'JetBrains Mono'; color: var(--accent-primary); margin-bottom: 20px; display: block; font-weight: 800;}
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .pricing-grid { grid-template-columns: 1fr; }
+            .steps-wrapper { grid-template-columns: 1fr; gap: 30px; }
+            .steps-wrapper::before { display: none; }
+            .plan-card.ultimate { transform: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container nav-container">
+            <div class="logo">
+                <i class="fa-solid fa-cube" style="color: var(--accent-primary);"></i> SYNTRAX
+            </div>
+        </div>
+    </header>
+
+    <section class="hero container">
+        <span class="hero-tagline mono">// Infrastructure Military Grade</span>
+        <h1>Доминируй в Telegram. <br><span class="gradient-text">Анонимно. Масштабно.</span></h1>
+        <p>
+            Профессиональная система автоматизации. Ваши лиды — наша инфраструктура.
+            Выбирайте план и получайте результат.
+        </p>
+
+        <div class="stats-row">
+            <div class="stat-badge"><i class="fa-solid fa-calendar-check"></i> 3 Года на рынке</div>
+            <div class="stat-badge"><i class="fa-solid fa-users"></i> 4,000+ Довольных клиентов</div>
+            <div class="stat-badge"><i class="fa-solid fa-shield-halved"></i> No Logs Policy</div>
+        </div>
+    </section>
+
+    <section class="container features-section">
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="card-icon"><i class="fa-solid fa-server"></i></div>
+                <h3>Bulletproof VPS</h3><p>Выделенные абузоустойчивые серверы в Европе. Пинг <1мс до Telegram.</p>
+            </div>
+            <div class="feature-card">
+                <div class="card-icon"><i class="fa-solid fa-user-secret"></i></div>
+                <h3>Ghost Protocol</h3>
+                <p>Полная анонимность. Цепочка зашифрованных IPv6 прокси. Никаких следов.</p>
+            </div>
+            <div class="feature-card">
+                <div class="card-icon"><i class="fa-solid fa-brain"></i></div>
+                <h3>Human AI Core</h3>
+                <p>Алгоритм имитирует поведение человека. Читает, печатает, делает паузы.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="workflow-section">
+        <div class="container">
+            <div class="workflow-header">
+                <h2>Как это работает?</h2>
+                <p style="color: var(--text-muted);">Процесс запуска занимает менее 10 минут</p>
+            </div>
+
+            <div class="steps-wrapper">
+                <div class="step-item">
+                    <div class="step-num">01</div>
+                    <h4>Оплата</h4>
+                    <p>Вам присылают чек (Crypto или Telegram Stars). <br>Если вы не умеете платить криптой — наша поддержка обучит вас за 2 минуты.</p>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-num">02</div>
+                    <h4>Контент</h4>
+                    <p>После оплаты вы просто присылаете рекламный текст и фото. Мы сами загружаем это в систему Syntrax.</p>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-num">03</div>
+                    <h4>Запуск</h4>
+                    <p>В ближайшее время ваша реклама автоматически запускается по сотням целевых групп. Вы получаете лиды.</p>
+                </div>
+            </div>
+
+            <div class="workflow-footer">
+                <i class="fa-solid fa-bolt" style="color: #FFD700; margin-right: 10px;"></i>
+                Быстро, Понятно, Удобно.
+            </div>
+        </div>
+    </section>
+
+    <section class="pricing-section">
+        <div class="container">
+
+            <div class="payment-header">
+                <div class="payment-methods">
+                    <div class="method active"><i class="fa-brands fa-bitcoin"></i> Crypto</div>
+                    <div style="color: #333;">|</div>
+                    <div class="method active"><i class="fa-solid fa-star"></i> Stars</div>
+                    <div style="color: #333;">|</div>
+                    <div class="method banned"><i class="fa-regular fa-credit-card"></i> Cards</div>
+                </div>
+            </div>
+
+            <div class="pricing-grid">
+
+                <div class="plan-card">
+                    <h3 class="plan-name">Syntrax Plus</h3>
+                    <div class="plan-price">$13</div>
+                    <div class="plan-sub">/ за 5 дней</div>
+
+                    <a href="https://t.me/syntrax_admin" class="plan-btn btn-outline">Выбрать Plus</a>
+
+                    <ul class="features-list">
+                        <li><i class="fa-solid fa-check check"></i> 3 приватных аккаунта</li>
+                        <li><i class="fa-solid fa-check check"></i> Доступ к публикации 1 фото</li>
+                        <li><i class="fa-solid fa-check check"></i> Загрузка своих баз групп</li>
+                        <li><i class="fa-solid fa-check check"></i> Рассылка: 230 групп (Random)</li>
+                        <li><i class="fa-solid fa-check check"></i> Отличный IPv6 прокси</li>
+                    </ul>
+                </div>
+
+                <div class="plan-card">
+                    <h3 class="plan-name">Syntrax Pro</h3>
+                    <div class="plan-price">$16</div>
+                    <div class="plan-sub">/ за 5 дней</div>
+
+                    <a href="https://t.me/syntrax_admin" class="plan-btn btn-outline">Выбрать Pro</a><ul class="features-list">
+                        <li><i class="fa-solid fa-check check"></i> 4 приватных аккаунта</li>
+                        <li><i class="fa-solid fa-check check"></i> Доступ к публикации до 2 фото</li>
+                        <li><i class="fa-solid fa-check check"></i> Загрузка своих баз групп</li>
+                        <li><i class="fa-solid fa-check check"></i> Рассылка: 300 групп (Random)</li>
+                        <li><i class="fa-solid fa-check check"></i> Отличный IPv6 прокси</li>
+                    </ul>
+                </div>
+
+                <div class="plan-card ultimate">
+                    <div class="rec-tag">Recommended</div>
+                    <h3 class="plan-name" style="color: var(--accent-primary);">Syntrax Ultimate</h3>
+                    <div class="plan-price">$20</div>
+                    <div class="plan-sub">/ за 5 дней</div>
+
+                    <a href="https://t.me/syntrax_admin" class="plan-btn btn-fill">Купить Ultimate</a>
+
+                    <ul class="features-list">
+                        <li><i class="fa-solid fa-check check"></i> <strong>5 приватных аккаунтов</strong></li>
+                        <li><i class="fa-solid fa-check check"></i> Доступ к публикации до 5 фото</li>
+                        <li><i class="fa-solid fa-check check"></i> Возможность добавить свои группы</li>
+                        <li><i class="fa-solid fa-check check"></i> <strong>Рассылка: 350+ групп</strong></li>
+                        <li><i class="fa-solid fa-check check"></i> Подборка групп под вашу нишу</li>
+                        <li><i class="fa-solid fa-check check"></i> Наш лучший Proxy</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="cube-container">
+                <div class="cube">
+                    <div class="face front"></div>
+                    <div class="face back"></div>
+                    <div class="face right"></div>
+                    <div class="face left"></div>
+                    <div class="face top"></div>
+                    <div class="face bottom"></div>
+                </div>
+            </div>
+
+            <p class="footer-slogan">Выбирайте только проверенный сервис</p>
+            <span class="footer-brand">SYNTRAX</span>
+            <p style="color: #444; font-size: 0.8rem;" class="mono">&copy; 2025 Secure Systems</p>
+        </div>
+    </footer>
+
+</body>
+</html>
