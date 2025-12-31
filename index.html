@@ -3,395 +3,469 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYNTRAX | Infrastructure Service</title>
+    <title>SYNTRAX | Protocol V.4</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* --- CSS БАЗА --- */
         :root {
-            --bg-main: #050507;
-            --bg-card: #0f0f16;
-            --text-main: #ffffff;
-            --text-muted: #94a3b8;
-
-            /* Цвета Proton-style но в темной теме */
-            --accent-primary: #6d4aff; /* Фиолетовый как у Proton */
-            --accent-glow: rgba(109, 74, 255, 0.4);
-            --success: #10b981; /* Зеленый для галочек */
-            --danger: #ef4444; /* Красный для зачеркнутого */
-
-            --border-glass: rgba(255, 255, 255, 0.08);
+            --bg: #030304;
+            --glass: rgba(20, 20, 25, 0.6);
+            --border: rgba(255, 255, 255, 0.04);
+            --primary: #8a63ff; /* Мягкий фиолетовый */
+            --text: #e0e0e0;
+            --muted: #6f6f7a;
+            --glow: 0 0 20px rgba(138, 99, 255, 0.15);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            font-family: 'Inter', sans-serif;
-            line-height: 1.5;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Manrope', sans-serif;
             overflow-x: hidden;
-            background-image: radial-gradient(circle at 50% 0%, rgba(109, 74, 255, 0.15) 0%, transparent 40%);
+            line-height: 1.7;
         }
 
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-        .mono { font-family: 'JetBrains Mono', monospace; }
+        /* --- ФОН (CANVAS) --- */
+        #network-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            opacity: 0.6;
+        }
 
-        .gradient-text {
-            background: linear-gradient(135deg, #fff 30%, var(--accent-primary) 100%);
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--primary); }
+
+        /* --- ХЕДЕР --- */
+        header {
+            padding: 40px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            opacity: 0;
+            animation: fadeIn 2s ease forwards;
+        }
+
+        .logo {
+            font-family: 'JetBrains Mono';
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            position: relative;
+        }
+        .logo::after {
+            content: '_';
+            animation: blink 1s infinite;
+        }
+
+        /* --- ИСТОРИЯ (Intro) --- */
+        .intro {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            animation: slideUp 1.5s ease forwards 0.5s;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 200;
+            margin-bottom: 30px;
+            line-height: 1.2;
+            background: linear-gradient(to right, #fff, #888);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        /* --- HEADER --- */
-        header {
-            padding: 25px 0;
-            border-bottom: 1px solid var(--border-glass);
-            backdrop-filter: blur(10px);
-            position: sticky; top: 0; z-index: 100;
-            background: rgba(5, 5, 7, 0.9);
-        }
-        .nav-container { display: flex; justify-content: space-between; align-items: center; }
-
-        .logo {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 800; font-size: 1.5rem; letter-spacing: -1px;
-            display: flex; align-items: center; gap: 12px;
+        .text-block {
+            font-size: 1.1rem;
+            color: #ccc;
+            margin-bottom: 25px;
+            max-width: 800px;
+            text-align: justify;
+            border-left: 1px solid var(--border);
+            padding-left: 20px;
         }
 
-        /* --- HERO --- */
-        .hero { padding: 100px 0 80px; text-align: center; max-width: 900px; margin: 0 auto; }
-        .hero-tagline { color: var(--accent-primary); font-weight: 700; letter-spacing: 2px; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 20px; display: block; }
-        h1 { font-size: 3.8rem; line-height: 1.1; font-weight: 800; margin-bottom: 30px; }
-        .hero p { font-size: 1.2rem; color: var(--text-muted); margin-bottom: 40px; max-width: 700px; margin-left: auto; margin-right: auto; }
-
-        /* Trust Badges */
-        .stats-row {
-            display: flex; justify-content: center; gap: 30px; margin-bottom: 60px; flex-wrap: wrap;
+        /* --- ТЕХНИЧЕСКАЯ БАЗА --- */
+        .specs-section {
+            margin: 100px 0;
         }
-        .stat-badge {
-            background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass);
-            padding: 10px 20px; border-radius: 50px; font-size: 0.9rem; color: var(--text-main); display: flex; align-items: center; gap: 10px;
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            font-weight: 300;
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
-        .stat-badge i { color: var(--accent-primary); }
-
-        /* --- FEATURES GRID --- */
-        .features-section { padding: 60px 0 80px; }
-        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
-
-        .feature-card {
-            background: var(--bg-card); border: 1px solid var(--border-glass);
-            padding: 35px; border-radius: 12px; transition: 0.3s;
+        .section-title::before {
+            content: ''; width: 30px; height: 1px; background: var(--primary);
         }
-        .feature-card:hover { border-color: var(--accent-primary); transform: translateY(-5px); }
 
-        .card-icon {
-            width: 50px; height: 50px; background: rgba(109, 74, 255, 0.1); border-radius: 8px;display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: var(--accent-primary);
-            margin-bottom: 20px;
+        .grid-tech {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
         }
-        .feature-card h3 { font-size: 1.2rem; margin-bottom: 10px; }
-        .feature-card p { color: var(--text-muted); font-size: 0.9rem; }
 
-        /* --- NEW: HOW IT WORKS (WORKFLOW) --- */
-        .workflow-section { padding: 80px 0; border-top: 1px solid var(--border-glass); }
-        .workflow-header { text-align: center; margin-bottom: 60px; }
-        .workflow-header h2 { font-size: 2.5rem; margin-bottom: 10px; }
+        .tech-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            padding: 30px;
+            border-radius: 4px;
+            backdrop-filter: blur(5px);
+            transition: 0.4s;
+        }
+        .tech-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--glow);
+            transform: translateY(-5px);
+        }
 
-        .steps-wrapper {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px;
+        .tech-icon { font-size: 1.5rem; color: var(--text); margin-bottom: 15px; }
+        .tech-card h3 { font-size: 1rem; margin-bottom: 10px; font-weight: 400; }
+        .tech-card p { font-size: 0.9rem; color: var(--muted); }
+
+        /* --- ТАРИФЫ --- */
+        .plans-container {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            margin-bottom: 120px;
+        }
+
+        .plan-row {
+            display: flex;
+            background: rgba(10, 10, 12, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: 0.3s;
             position: relative;
         }
-        /* Линия соединения (только для ПК) */
-        .steps-wrapper::before {
-            content: ''; position: absolute; top: 40px; left: 10%; right: 10%; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--border-glass) 20%, var(--border-glass) 80%, transparent);
-            z-index: 0;
+
+        .plan-row::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+            background: var(--border); transition: 0.3s;
+        }
+        .plan-row:hover::before { background: var(--primary); }
+        .plan-row:hover { transform: scale(1.01); background: rgba(20, 20, 25, 0.9); }
+
+        .plan-info {
+            padding: 30px;
+            flex: 1;
         }
 
-        .step-item {
-            background: var(--bg-main); /* Чтобы перекрыть линию */
-            position: relative; z-index: 1;
-            text-align: center; padding: 0 10px;
+        .plan-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
-        .step-num {
-            width: 80px; height: 80px; margin: 0 auto 25px;
-            background: var(--bg-card); border: 1px solid var(--border-glass);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-family: 'JetBrains Mono'; font-size: 1.5rem; font-weight: 800;
-            color: var(--text-muted); box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        .plan-name { font-family: 'JetBrains Mono'; font-size: 1.2rem; color: #fff; }
+        .plan-cost { font-family: 'JetBrains Mono'; color: var(--muted); font-size: 0.9rem; }
+
+        .plan-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .feat-item {
+            font-size: 0.9rem;
+            color: #bbb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .feat-item i { font-size: 0.6rem; color: var(--primary); }
+
+        /* --- FOOTER --- */
+        .footer-action {
+            text-align: center;
+            padding: 60px 0;
+            border-top: 1px solid var(--border);
+        }
+
+        .bot-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 15px 40px;
+            border: 1px solid var(--text);
+            color: var(--text);
+            text-decoration: none;
+            font-family: 'JetBrains Mono';
+            font-size: 0.9rem;
             transition: 0.3s;
-        }
-        .step-item:hover .step-num { color: var(--accent-primary); border-color: var(--accent-primary); }
-
-        .step-item h4 { font-size: 1.2rem; margin-bottom: 15px; }
-        .step-item p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; }
-
-        .workflow-footer {
-            text-align: center; margin-top: 60px;
-            padding: 20px; background: rgba(109, 74, 255, 0.05);
-            border-radius: 12px; border: 1px solid rgba(109, 74, 255, 0.2);
-            font-weight: 600; color: white;
+            background: transparent;
+            position: relative;
+            overflow: hidden;
         }
 
-        /* --- PRICING (PROTON STYLE) --- */
-        .pricing-section { padding: 80px 0; border-top: 1px solid var(--border-glass); background: rgba(255,255,255,0.01); }
-
-        .payment-header { text-align: center; margin-bottom: 50px; }
-        .payment-methods {
-            display: inline-flex; align-items: center; gap: 20px;
-            background: #111; padding: 10px 25px; border-radius: 50px; border: 1px solid var(--border-glass);
-        }
-        .method { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600; }
-        .method.active { color: #fff; }
-        .method.active i { color: #FFD700; }
-        .method.banned { color: #555; text-decoration: line-through; opacity: 0.6; }
-
-        .pricing-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px; align-items: start;
+        .bot-btn:hover {
+            background: var(--text);
+            color: #000;
+            box-shadow: 0 0 30px rgba(255,255,255,0.2);
         }
 
-        .plan-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-glass);
-            border-radius: 16px; padding: 30px;
-            display: flex; flex-direction: column; height: 100%;
-            position: relative; transition: 0.3s;
-        }
-        .plan-card:hover { border-color: #444; }
-
-        .plan-card.ultimate {
-            background: linear-gradient(180deg, rgba(109, 74, 255, 0.08) 0%, var(--bg-card) 100%);
-            border: 1px solid var(--accent-primary);
-            box-shadow: 0 0 40px rgba(109, 74, 255, 0.15);
-            transform: scale(1.02); z-index: 10;
-        }
-        .rec-tag {
-            position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
-            background: var(--accent-primary); color: white;
-            padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;text-transform: uppercase; letter-spacing: 1px;
-        }
-
-        .plan-name { font-size: 1.1rem; color: var(--text-muted); font-weight: 600; margin-bottom: 10px; }
-        .plan-price { font-size: 2.2rem; font-weight: 800; color: white; margin-bottom: 5px; }
-        .plan-sub { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 25px; }
-
-        .plan-btn {
-            width: 100%; padding: 14px; border-radius: 8px; font-weight: 600; text-align: center;
-            text-decoration: none; margin-bottom: 30px; transition: 0.2s;
-        }
-        .btn-outline { border: 1px solid var(--border-glass); color: white; }
-        .btn-outline:hover { background: rgba(255,255,255,0.05); border-color: white; }
-        .btn-fill { background: var(--accent-primary); color: white; border: none; }
-        .btn-fill:hover { background: #5a3de0; }
-
-        .features-list { list-style: none; }
-        .features-list li {
-            margin-bottom: 12px; font-size: 0.9rem; color: #cbd5e1;
-            display: flex; align-items: flex-start; gap: 10px; line-height: 1.4;
-        }
-        .check { color: var(--success); min-width: 16px; margin-top: 3px; }
-
-        /* --- FOOTER & CUBE --- */
-        footer {
-            padding: 80px 0 40px; text-align: center; border-top: 1px solid var(--border-glass);
-            background: #020203;
-        }
-        .cube-container { width: 40px; height: 40px; margin: 0 auto 20px; perspective: 1000px; }
-        .cube {
-            width: 100%; height: 100%; position: relative; transform-style: preserve-3d;
-            transform: rotateX(-20deg) rotateY(35deg);
-        }
-        .face {
-            position: absolute; width: 40px; height: 40px;
-            background: rgba(109, 74, 255, 0.2); border: 1px solid var(--accent-primary);
-            box-shadow: 0 0 15px rgba(109, 74, 255, 0.3);
-        }
-        .front { transform: translateZ(20px); }
-        .back { transform: rotateY(180deg) translateZ(20px); }
-        .right { transform: rotateY(90deg) translateZ(20px); }
-        .left { transform: rotateY(-90deg) translateZ(20px); }
-        .top { transform: rotateX(90deg) translateZ(20px); }
-        .bottom { transform: rotateX(-90deg) translateZ(20px); }
-
-        .footer-slogan { font-size: 1.1rem; font-weight: 600; margin-bottom: 5px; color: white; }
-        .footer-brand { font-family: 'JetBrains Mono'; color: var(--accent-primary); margin-bottom: 20px; display: block; font-weight: 800;}
+        /* АНИМАЦИИ */
+        @keyframes blink { 50% { opacity: 0; } }
+        @keyframes fadeIn { to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         @media (max-width: 768px) {
-            h1 { font-size: 2.5rem; }
-            .pricing-grid { grid-template-columns: 1fr; }
-            .steps-wrapper { grid-template-columns: 1fr; gap: 30px; }
-            .steps-wrapper::before { display: none; }
-            .plan-card.ultimate { transform: none; }
+            h1 { font-size: 2rem; }
+            .plan-features { grid-template-columns: 1fr; }
+            .plan-row { flex-direction: column; }
+            .text-block { border-left: none; padding-left: 0; text-align: left; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="container nav-container">
-            <div class="logo">
-                <i class="fa-solid fa-cube" style="color: var(--accent-primary);"></i> SYNTRAX
+    <canvas id="network-canvas"></canvas>
+
+    <div class="container">
+
+        <header>
+            <div class="logo">SYNTRAX</div>
+            <div class="mono">STATUS: ONLINE</div>
+        </header>
+
+        <section class="intro">
+            <div class="mono" style="margin-bottom: 20px;">// SYSTEM_V4_INIT</div>
+            <h1>Разработка собственной архитектуры<br>как ответ на ограничения.</h1>
+
+            <div class="text-block">
+                Проект SYNTRAX возник из практической необходимости. Существующие на рынке публичные решения не справлялись с поставленными задачами из-за устаревших методов маршрутизации и постоянных блокировок. Мы отказались от использования готовых библиотек и написали собственное ядро для работы с API мессенджера. Базирование инфраструктуры в Нидерландах было выбрано осознанно: это обеспечивает необходимую пропускную способность и минимальный пинг до основных дата-центров.
             </div>
+            <div class="text-block">
+                В ходе тестирования выяснилось, что эмуляция задержек работает эффективнее агрессивного спама. Система ведет себя как среднестатистический пользователь, что практически исключает внимание со стороны анти-фрод фильтров. На данный момент вычислительных мощностей достаточно для открытия ограниченного доступа. Мы предоставляем рабочий инструмент, не требуя верификации личности и не задавая лишних вопросов.
+            </div>
+        </section>
+
+        <section class="specs-section">
+            <div class="section-title">ТЕХНИЧЕСКАЯ БАЗА</div>
+
+            <div class="grid-tech">
+                <div class="tech-card">
+                    <div class="tech-icon"><i class="fa-solid fa-server"></i></div>
+                    <h3>NL Infrastructure</h3>
+                    <p>Физическое расположение серверов в Нидерландах. Пинг до дата-центров менее 25мс. Это обеспечивает высокую скорость отклика.</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon"><i class="fa-solid fa-fingerprint"></i></div>
+                    <h3>Syntrax v.4 Model</h3>
+                    <p>Алгоритм полного цикла. Генерация уникальных цифровых отпечатков устройства и поддержка протоколов SOCKS5/IPv4.</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon"><i class="fa-solid fa-user-shield"></i></div>
+                    <h3>Отсутствие логов</h3>
+                    <p>Регистрация не требуется. Вход осуществляется по ID. Оплата криптовалютой, Stars или банковской картой через шлюз.</p>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                    <h3>Biorhythm AI</h3>
+                    <p>Эмуляция поведения человека. Система делает нелинейные паузы и имитирует набор текста, снижая риск детекции.</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon"><i class="fa-solid fa-shield-virus"></i></div>
+                    <h3>Zero-Day Update</h3>
+                    <p>Оперативная адаптация к изменениям алгоритмов мессенджера. Обновления безопасности внедряются в кратчайшие сроки.</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon"><i class="fa-solid fa-box"></i></div>
+                    <h3>Session Isolation</h3>
+                    <p>Каждый процесс запускается в изолированном контейнере. Сбой одного элемента не влияет на общую стабильность системы.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="specs-section">
+            <div class="section-title">КОНФИГУРАЦИИ</div>
+            <p style="color: var(--muted); margin-bottom: 30px;">
+                Доступные варианты использования ресурсов системы.
+            </p>
+
+            <div class="plans-container">
+
+                <div class="plan-row">
+                    <div class="plan-info">
+                        <div class="plan-meta">
+                            <span class="plan-name">PLUS</span>
+                            <span class="plan-cost">13$ / 750 Stars * 5 Дней</span>
+                        </div>
+                        <div class="plan-features">
+                            <div class="feat-item"><i class="fa-solid fa-circle"></i> Лимит: 450 сообщений/сутки</div>
+                            <div class="feat-item"><i class="fa-solid fa-circle"></i> Охват: 450 групп</div>
+                            <div class="feat-item"><i class="fa-solid fa-circle"></i> 1 Аккаунт</div>
+                            <div class="feat-item"><i class="fa-solid fa-circle"></i> Подходит для тестов</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="plan-row">
+                    <div class="plan-info">
+                        <div class="plan-meta">
+                            <span class="plan-name">PRO</span>
+                            <span class="plan-cost">16$ / 1000 Stars * 5 Дней</span>
+                        </div>
+                        <div class="plan-features">
+                            <div class="feat-item"><i class="fa-solid fa-circle"></i> Лимит: 900 сообщений/сутки</div>
+                            <div class="feat-item"><i class="fa-solid fa-circle"></i> Охват: 900 групп</div>
+                            <div class="feat-item"><i class="fa-solid fa-circle"></i> 2 Аккаунта (Premium)</div>
+                            <div class="feat-item"><i class="fa-solid fa-circle"></i> Поддержка 3 фото</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="plan-row">
+                    <div class="plan-info">
+                        <div class="plan-meta">
+                            <span class="plan-name">ULTIMATE</span>
+                            <span class="plan-cost">20$ / 1250 Stars * 5 Дней</span>
+                        </div>
+                        <div class="plan-features">
+                            <div class="feat-item"><i class="fa-solid fa-circle"></i> Лимит: 1400 сообщений/сутки</div>
+                            <div class="feat-item"><i class="fa-solid fa-circle"></i> Охват: 1400 групп</div>
+                            <div class="feat-item"><i class="fa-solid fa-circle"></i> 3 Аккаунта (Premium)</div>
+                            <div class="feat-item"><i class="fa-solid fa-circle"></i> Поддержка 5+ фото</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <div class="footer-action">
+            <p style="color: #fff; margin-bottom: 10px;">Взаимодействие осуществляется через интерфейс бота.</p>
+            <p class="mono">Полная автоматизация процессов.</p>
+            <a href="https://t.me/sntxhelp_bot" class="bot-btn">ЗАПУСТИТЬ СИСТЕМУ</a>
         </div>
-    </header>
 
-    <section class="hero container">
-        <span class="hero-tagline mono">// Infrastructure Military Grade</span>
-        <h1>Доминируй в Telegram. <br><span class="gradient-text">Анонимно. Масштабно.</span></h1>
-        <p>
-            Профессиональная система автоматизации. Ваши лиды — наша инфраструктура.
-            Выбирайте план и получайте результат.
-        </p>
+    </div>
 
-        <div class="stats-row">
-            <div class="stat-badge"><i class="fa-solid fa-calendar-check"></i> 3 Года на рынке</div>
-            <div class="stat-badge"><i class="fa-solid fa-users"></i> 4,000+ Довольных клиентов</div>
-            <div class="stat-badge"><i class="fa-solid fa-shield-halved"></i> No Logs Policy</div>
-        </div>
-    </section>
+    <script>
+        const canvas = document.getElementById('network-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
 
-    <section class="container features-section">
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="card-icon"><i class="fa-solid fa-server"></i></div>
-                <h3>Bulletproof VPS</h3><p>Выделенные абузоустойчивые серверы в Европе. Пинг <1мс до Telegram.</p>
-            </div>
-            <div class="feature-card">
-                <div class="card-icon"><i class="fa-solid fa-user-secret"></i></div>
-                <h3>Ghost Protocol</h3>
-                <p>Полная анонимность. Цепочка зашифрованных IPv6 прокси. Никаких следов.</p>
-            </div>
-            <div class="feature-card">
-                <div class="card-icon"><i class="fa-solid fa-brain"></i></div>
-                <h3>Human AI Core</h3>
-                <p>Алгоритм имитирует поведение человека. Читает, печатает, делает паузы.</p>
-            </div>
-        </div>
-    </section>
+        // Настройка сети
+        const properties = {
+            bgColor: 'rgba(3, 3, 4, 1)',
+            particleColor: 'rgba(138, 99, 255, 1)',
+            particleRadius: 2,
+            particleCount: 70,
+            lineLength: 150,
+            particleSpeed: 0.5,
+        };
 
-    <section class="workflow-section">
-        <div class="container">
-            <div class="workflow-header">
-                <h2>Как это работает?</h2>
-                <p style="color: var(--text-muted);">Процесс запуска занимает менее 10 минут</p>
-            </div>
+        // Ресайз
+        window.onresize = function() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        };
+        window.onresize();
 
-            <div class="steps-wrapper">
-                <div class="step-item">
-                    <div class="step-num">01</div>
-                    <h4>Оплата</h4>
-                    <p>Вам присылают чек (Crypto или Telegram Stars). <br>Если вы не умеете платить криптой — наша поддержка обучит вас за 2 минуты.</p>
-                </div>
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.velocityX = Math.random() * (properties.particleSpeed * 2) - properties.particleSpeed;
+                this.velocityY = Math.random() * (properties.particleSpeed * 2) - properties.particleSpeed;
+            }
+            position() {
+                // Движение
+                this.x += this.velocityX;
+                this.y += this.velocityY;
 
-                <div class="step-item">
-                    <div class="step-num">02</div>
-                    <h4>Контент</h4>
-                    <p>После оплаты вы просто присылаете рекламный текст и фото. Мы сами загружаем это в систему Syntrax.</p>
-                </div>
+                // Отскок от стен
+                if(this.x > width || this.x < 0) this.velocityX *= -1;
+                if(this.y > height || this.y < 0) this.velocityY *= -1;
+            }
+            reDraw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, properties.particleRadius, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fillStyle = properties.particleColor;
+                ctx.fill();
+            }
+        }
 
-                <div class="step-item">
-                    <div class="step-num">03</div>
-                    <h4>Запуск</h4>
-                    <p>В ближайшее время ваша реклама автоматически запускается по сотням целевых групп. Вы получаете лиды.</p>
-                </div>
-            </div>
+        // Заполнение частицами
+        function initParticles() {
+            particles = [];
+            for(let i = 0; i < properties.particleCount; i++){
+                particles.push(new Particle());
+            }
+        }
 
-            <div class="workflow-footer">
-                <i class="fa-solid fa-bolt" style="color: #FFD700; margin-right: 10px;"></i>
-                Быстро, Понятно, Удобно.
-            </div>
-        </div>
-    </section>
+        // Отрисовка линий
+        function drawLines() {
+            let x1, y1, x2, y2, length, opacity;
+            for(let i in particles){
+                for(let j in particles){
+                    x1 = particles[i].x;
+                    y1 = particles[i].y;
+                    x2 = particles[j].x;
+                    y2 = particles[j].y;
+                    length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 
-    <section class="pricing-section">
-        <div class="container">
+                    if(length < properties.lineLength){
+                        opacity = 1 - length / properties.lineLength;
+                        ctx.lineWidth = '0.5';
+                        ctx.strokeStyle = 'rgba(138, 99, 255, '+opacity+')';
+                        ctx.beginPath();
+                        ctx.moveTo(x1, y1);
+                        ctx.lineTo(x2, y2);
+                        ctx.closePath();
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
 
-            <div class="payment-header">
-                <div class="payment-methods">
-                    <div class="method active"><i class="fa-brands fa-bitcoin"></i> Crypto</div>
-                    <div style="color: #333;">|</div>
-                    <div class="method active"><i class="fa-solid fa-star"></i> Stars</div>
-                    <div style="color: #333;">|</div>
-                    <div class="method banned"><i class="fa-regular fa-credit-card"></i> Cards</div>
-                </div>
-            </div>
+        // Мышка
+        let mouse = { x: 0, y: 0 };
+        document.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
 
-            <div class="pricing-grid">
+        function loop() {
+            ctx.clearRect(0,0,width,height);
+            for(let i in particles){
+                particles[i].position();
+                particles[i].reDraw();
+            }
+            drawLines();
+            requestAnimationFrame(loop);
+        }
 
-                <div class="plan-card">
-                    <h3 class="plan-name">Syntrax Plus</h3>
-                    <div class="plan-price">$13</div>
-                    <div class="plan-sub">/ за 5 дней</div>
-
-                    <a href="https://t.me/sntxhelp_bot" class="plan-btn btn-outline">Выбрать Plus</a>
-
-                    <ul class="features-list">
-                        <li><i class="fa-solid fa-check check"></i> 3 приватных аккаунта</li>
-                        <li><i class="fa-solid fa-check check"></i> Доступ к публикации 1 фото</li>
-                        <li><i class="fa-solid fa-check check"></i> Загрузка своих баз групп</li>
-                        <li><i class="fa-solid fa-check check"></i> Рассылка: 230 групп (Random)</li>
-                        <li><i class="fa-solid fa-check check"></i> Отличный IPv6 прокси</li>
-                    </ul>
-                </div>
-
-                <div class="plan-card">
-                    <h3 class="plan-name">Syntrax Pro</h3>
-                    <div class="plan-price">$16</div>
-                    <div class="plan-sub">/ за 5 дней</div>
-
-                    <a href="https://t.me/sntxhelp_bot" class="plan-btn btn-outline">Выбрать Pro</a><ul class="features-list">
-                        <li><i class="fa-solid fa-check check"></i> 4 приватных аккаунта</li>
-                        <li><i class="fa-solid fa-check check"></i> Доступ к публикации до 2 фото</li>
-                        <li><i class="fa-solid fa-check check"></i> Загрузка своих баз групп</li>
-                        <li><i class="fa-solid fa-check check"></i> Рассылка: 300 групп (Random)</li>
-                        <li><i class="fa-solid fa-check check"></i> Отличный IPv6 прокси</li>
-                    </ul>
-                </div>
-
-                <div class="plan-card ultimate">
-                    <div class="rec-tag">Recommended</div>
-                    <h3 class="plan-name" style="color: var(--accent-primary);">Syntrax Ultimate</h3>
-                    <div class="plan-price">$20</div>
-                    <div class="plan-sub">/ за 5 дней</div>
-
-                    <a href="https://t.me/sntxhelp_bot" class="plan-btn btn-fill">Купить Ultimate</a>
-
-                    <ul class="features-list">
-                        <li><i class="fa-solid fa-check check"></i> <strong>5 приватных аккаунтов</strong></li>
-                        <li><i class="fa-solid fa-check check"></i> Доступ к публикации до 5 фото</li>
-                        <li><i class="fa-solid fa-check check"></i> Возможность добавить свои группы</li>
-                        <li><i class="fa-solid fa-check check"></i> <strong>Рассылка: 350+ групп</strong></li>
-                        <li><i class="fa-solid fa-check check"></i> Подборка групп под вашу нишу</li>
-                        <li><i class="fa-solid fa-check check"></i> Наш лучший Proxy</li>
-                    </ul>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <footer>
-        <div class="container">
-            <div class="cube-container">
-                <div class="cube">
-                    <div class="face front"></div>
-                    <div class="face back"></div>
-                    <div class="face right"></div>
-                    <div class="face left"></div>
-                    <div class="face top"></div>
-                    <div class="face bottom"></div>
-                </div>
-            </div>
-
-            <p class="footer-slogan">Выбирайте только проверенный сервис</p>
-            <span class="footer-brand">SYNTRAX</span>
-            <p style="color: #444; font-size: 0.8rem;" class="mono">&copy; 2025 Secure Systems</p>
-        </div>
-    </footer>
-
+        initParticles();
+        loop();
+    </script>
 </body>
 </html>
